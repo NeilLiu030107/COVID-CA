@@ -1,0 +1,39 @@
+<PAMDataset>
+  <Metadata>
+    <MDI key="air_temperature#_FillValue">nan</MDI>
+    <MDI key="crs#GeoTransform">-124.7666666333333 0.041666666666666 0  49.400000000000000 -0.041666666666666</MDI>
+    <MDI key="crs#grid_mapping_name">latitude_longitude</MDI>
+    <MDI key="crs#inverse_flattening">298.257223563</MDI>
+    <MDI key="crs#longitude_of_prime_meridian">0</MDI>
+    <MDI key="crs#long_name">WGS 84</MDI>
+    <MDI key="crs#semi_major_axis">6378137</MDI>
+    <MDI key="crs#spatial_ref">GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]</MDI>
+    <MDI key="lat#axis">Y</MDI>
+    <MDI key="lat#description">latitude</MDI>
+    <MDI key="lat#long_name">latitude</MDI>
+    <MDI key="lat#standard_name">latitude</MDI>
+    <MDI key="lat#units">degrees_north</MDI>
+    <MDI key="lat#_FillValue">nan</MDI>
+    <MDI key="lon#axis">X</MDI>
+    <MDI key="lon#description">longitude</MDI>
+    <MDI key="lon#long_name">longitude</MDI>
+    <MDI key="lon#standard_name">longitude</MDI>
+    <MDI key="lon#units">degrees_east</MDI>
+    <MDI key="lon#_FillValue">nan</MDI>
+    <MDI key="NETCDF_DIM_EXTRA">{year}</MDI>
+    <MDI key="NETCDF_DIM_year_DEF">{42,10}</MDI>
+    <MDI key="NETCDF_DIM_year_VALUES">{1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020}</MDI>
+  </Metadata>
+  <PAMRasterBand band="1">
+    <UnitType>m</UnitType>
+    <Metadata>
+      <MDI key="NETCDF_DIM_year">2020</MDI>
+      <MDI key="NETCDF_VARNAME">air_temperature</MDI>
+      <MDI key="STATISTICS_MAXIMUM">307.32553100586</MDI>
+      <MDI key="STATISTICS_MEAN">293.65578411102</MDI>
+      <MDI key="STATISTICS_MINIMUM">277.3551940918</MDI>
+      <MDI key="STATISTICS_STDDEV">5.0043506791496</MDI>
+      <MDI key="_FillValue">nan</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

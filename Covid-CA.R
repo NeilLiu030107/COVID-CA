@@ -6,7 +6,11 @@ library(sp)
 library(rgdal)
 library(raster)
 library(lubridate)
+library(sf)
+library(spdep)
+library(cartography)
 
+options(scipen=999)
 
 ###Part 1: Read data
 
@@ -62,7 +66,7 @@ ca_elev_mask <- raster::mask(x=ca_elev, CA_state_boundary)
 #pop density!
 pop_density <- read.csv("covid-data/pop_density.csv")
 pop_density <- pop_density %>% 
-  rename(region=ï..Region) %>%
+  rename(region=ï..region) %>%
   select(region, popDensity)
 
 #health coverage(unit min) resolution 0.008
@@ -83,9 +87,13 @@ hospital <- hospital %>%
   select(region, date, icu_occupancy)
 
 #poverty rate according to California measure from PPIC
-poverty <- read.csv("covid-data/poverty-across-california.csv")
-poverty <- poverty %>%
-  select(region, Rate)
+#poverty <- read.csv("covid-data/poverty-across-california.csv")
+
+#poverty <- poverty %>%
+  #rename(poverty_rate=Rate) %>%
+  #select(region, poverty_rate)
+
+
 
 #night light(development level) resolution 0.0008
 
@@ -104,8 +112,9 @@ vax <- vax %>%
 #social distancing--from Apple--direction search frequency 1/13
 ca_mobility_trend <- read.csv("covid-data/ca_mobility_trend.csv")
 ca_mobility_trend <- ca_mobility_trend %>%
-  group_by(region, date)%>%
+  group_by(region, date) %>%
   summarise(mobility_trend=mean(mobility_trend))
+  
 
 #match resolution for raster objects
 ca_elev_mask <- resample(ca_elev_mask,ca_maxTemp_mask, method="bilinear")
@@ -113,8 +122,8 @@ ca_travel_time_mask <-resample(ca_travel_time_mask,ca_maxTemp_mask, method="bili
 ca_night_light_mask <- resample(ca_night_light_mask, ca_maxTemp_mask, method="bilinear")
 
 #assign covariants to counties
-cov_ca <- merge(cov_ca, pop_density, by.x="NAMELSAD", by.y="region", all.x=TRUE)
-cov_ca <- merge(cov_ca, poverty, by.x="NAMELSAD", by.y="region", all.x=TRUE)
+cov_ca <- sp::merge(cov_ca, pop_density, by.x="NAMELSAD", by.y="region", all.x=TRUE)
+cov_ca <- sp::merge(cov_ca, poverty, by.x="NAMELSAD", by.y="region", all.x=TRUE)
 cov_ca$ppt <- raster::extract(ca_rainfall_mask, cov_ca, fun=mean, na.rm=TRUE)
 cov_ca$mxTemp <- raster::extract(ca_maxTemp_mask, cov_ca, fun=mean, na.rm=TRUE)
 cov_ca$minTemp <-raster::extract(ca_minTemp_mask, cov_ca, fun=mean, na.rm=TRUE)
@@ -217,9 +226,9 @@ data_June272021 <- cov_data %>%
   filter(date=="6/27/2021") %>%
   select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
-#August 10
-data_August102021 <- cov_data %>%
-  filter(date=="8/10/2021") %>%
+#August 9
+data_August092021 <- cov_data %>%
+  filter(date=="8/9/2021") %>%
   select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 ##Mapping function
@@ -264,9 +273,99 @@ Choropleths(data_July132020)
 Choropleths(data_Dec152020)
 Choropleths(data_April152021)
 Choropleths(data_June152021)
-Choropleths(data_August102021)
+Choropleths(data_August092021)
 
 ##Part.3 Spatial Analysis
+#summarise cov_data with average mobility trend and icu occupancy
+data_1 <- cov_data %>%
+  group_by(region) %>%
+  summarise(mobility_trend=mean(mobility_trend, na.rm = TRUE),icu_occupancy=mean(icu_occupancy, na.rm=TRUE))
+#August 10 data
+data_2 <-data_August092021 %>%
+  select(region, cases_per_1000, fatality, vax_ratio)
+#data from spatial polygon data frame
+data_3 <- cov_ca@data %>%
+  select(NAMELSAD, popDensity, ppt, mxTemp, minTemp, elevation, travel_time, night_light)
+
+#making a general dataset for analysis
+data_general <- merge(data_1,data_2, by="region")
+data_general <- merge(data_general, data_3, by.x="region", by.y="NAMELSAD")
+
+
+#stepwise regression modelling
+
+
+glm_mod_1 <- glm(cases_per_1000 ~ vax_ratio+mobility_trend+night_light+ppt+mxTemp+minTemp+elevation+popDensity, data=data_general, family="poisson")
+
+summary(glm_mod_1)
+
+#vaccination ratio, precipitation, population density, and max temperature are significant predictors of covid incidence rate.
+
+glm_mod_1_vax <- glm(cases_per_1000 ~ vax_ratio,  data=data_general, family="poisson")
+
+summary(glm_mod_1_vax)
+
+glm_mod_1_precipitation<- glm(cases_per_1000 ~ ppt,  data=data_general, family="poisson")
+
+summary(glm_mod_1_precipitation)
+
+glm_mod_1_mxTemp <- glm(cases_per_1000 ~ mxTemp,  data=data_general, family="poisson")
+
+summary(glm_mod_1_mxTemp)
+
+glm_mod_1_popDensity <- glm(cases_per_1000 ~ popDensity,  data=data_general, family="poisson")
+
+summary(glm_mod_1_popDensity)
+
+glm_mod_1_elev <- glm(cases_per_1000 ~ elevation,  data=data_general, family="poisson")
+
+summary(glm_mod_1_elev)
+
+glm_mod_1_minTemp <-glm(cases_per_1000 ~ minTemp,  data=data_general, family="poisson")
+
+summary(glm_mod_1_minTemp)
+
+glm_mod_1_sig <- glm(cases_per_1000 ~ vax_ratio+ppt+mxTemp+minTemp+elevation+popDensity, data=data_general, family="poisson")
+
+summary(glm_mod_1_sig)
+#since p-value for minTemp is greater than 0.05, remove minTemp
+
+glm_mod_1_sig_2 <- glm(cases_per_1000 ~ vax_ratio+ppt+mxTemp+elevation+popDensity, data=data_general, family="poisson")
+
+summary(glm_mod_1_sig_2)
+ggplot()+geom_point(aes(glm_mod_1_elev$fitted.values, data_general$cases_per_1000))
+
+#fatality
+glm_mod_2 <- glm(fatality ~ icu_occupancy+ vax_ratio+popDensity+ppt+mxTemp+minTemp+elevation+travel_time+night_light, data=data_general, family="binomial")
+
+summary(glm_mod_2)
+#No statistically significant predictor of covid fatality was found
+
+#autocorrelation
+ca_nb <- poly2nb(CA_counties_boundary)
+
+ca_w<- nb2listw(ca_nb)
+
+moran.test(data_general$cases_per_1000, listw= ca_w)
+#spatial autocorrelation is rejected as p-value > 0.05
+moran.test(data_general$fatality, listw= ca_w)
+#spatial autocorrelation is rejected
+
+#visualization of model and actual case
+
+choroLayer(spdf=CA_counties_boundary, df=data_general, 
+           spdfid="NAMELSAD", dfid="region",
+           var="cases_per_1000", legend.pos = "bottomleft", 
+           legend.horiz = T, legend.title.txt = "Cumulative cases per 1000 people")
+title("Observed Cases Count")
+
+data_general$fitted_glm <- fitted(glm_mod_1_sig_2)
+
+choroLayer(spdf=CA_counties_boundary, df=data_general, 
+           spdfid="NAMELSAD", dfid="region",
+           var="fitted_glm", legend.pos = "bottomleft", 
+           legend.horiz = T, legend.title.txt = "Cumulative cases per 1000 people")
+title("GLM model")
 
 
 

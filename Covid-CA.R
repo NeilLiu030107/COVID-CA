@@ -123,7 +123,6 @@ ca_night_light_mask <- resample(ca_night_light_mask, ca_maxTemp_mask, method="bi
 
 #assign covariants to counties
 cov_ca <- sp::merge(cov_ca, pop_density, by.x="NAMELSAD", by.y="region", all.x=TRUE)
-cov_ca <- sp::merge(cov_ca, poverty, by.x="NAMELSAD", by.y="region", all.x=TRUE)
 cov_ca$ppt <- raster::extract(ca_rainfall_mask, cov_ca, fun=mean, na.rm=TRUE)
 cov_ca$mxTemp <- raster::extract(ca_maxTemp_mask, cov_ca, fun=mean, na.rm=TRUE)
 cov_ca$minTemp <-raster::extract(ca_minTemp_mask, cov_ca, fun=mean, na.rm=TRUE)
@@ -221,14 +220,9 @@ data_June152021 <- cov_data %>%
   filter(date=="6/15/2021") %>%
   select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
-#June 27 2021 delta variant 
-data_June272021 <- cov_data %>%
-  filter(date=="6/27/2021") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
-
-#August 9
-data_August092021 <- cov_data %>%
-  filter(date=="8/9/2021") %>%
+#August 5
+data_August052021 <- cov_data %>%
+  filter(date=="8/5/2021") %>%
   select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 ##Mapping function
@@ -267,13 +261,21 @@ Choropleths <-function(data){
 }
 
 Choropleths(data_March042020)
+Choropleths(data_March132020)
 Choropleths(data_March292020)
 Choropleths(data_May252020)
+Choropleths(data_June182020)
 Choropleths(data_July132020)
+Choropleths(data_August282020)
+Choropleths(data_Octo142020)
+Choropleths(data_Nov192020)
 Choropleths(data_Dec152020)
+Choropleths(data_Dec292020)
+Choropleths(data_Jan252021)
+Choropleths(data_March012021)
 Choropleths(data_April152021)
 Choropleths(data_June152021)
-Choropleths(data_August092021)
+Choropleths(data_August052021)
 
 ##Part.3 Spatial Analysis
 #summarise cov_data with average mobility trend and icu occupancy

@@ -28,16 +28,12 @@ CA_state_boundary <- readOGR(dsn=".",layer="CA_State_TIGER2016")
 CA_counties_boundary <- readOGR(dsn="./CA_Counties", layer="CA_Counties_TIGER2016")
 cov_ca <-readOGR(dsn="./CA_Counties", layer="CA_Counties_TIGER2016")
 
-##align crs coordinates with raster objects
-CA_state_boundary <-spTransform(CA_state_boundary, crs(maxTemp))
-CA_counties_boundary <-spTransform(CA_counties_boundary,crs(maxTemp))
-cov_ca <- spTransform(cov_ca, crs(maxTemp))
-
 #annual average max temperature! from cal-adapt GRIDMET OBSERVED METEROLOGICAL DATA (unit=K)
 maxTemp <- raster("covid-data/tmmx_year_avg_2020.tif")
 
 ##align crs coordinates with raster objects
 CA_state_boundary <-spTransform(CA_state_boundary, crs(maxTemp))
+CA_counties_boundary <-spTransform(CA_counties_boundary,crs(maxTemp))
 cov_ca <- spTransform(cov_ca, crs(maxTemp))
 
 ca_maxTemp <- raster::crop(x=maxTemp, y=CA_state_boundary)
@@ -122,7 +118,7 @@ ca_travel_time_mask <-resample(ca_travel_time_mask,ca_maxTemp_mask, method="bili
 ca_night_light_mask <- resample(ca_night_light_mask, ca_maxTemp_mask, method="bilinear")
 
 #assign covariants to counties
-cov_ca <- sp::merge(cov_ca, pop_density, by.x="NAMELSAD", by.y="region", all.x=TRUE)
+cov_ca <- sp::merge(cov_ca, ca_pop_density, by.x="NAMELSAD", by.y="region", all.x=TRUE)
 cov_ca$ppt <- raster::extract(ca_rainfall_mask, cov_ca, fun=mean, na.rm=TRUE)
 cov_ca$mxTemp <- raster::extract(ca_maxTemp_mask, cov_ca, fun=mean, na.rm=TRUE)
 cov_ca$minTemp <-raster::extract(ca_minTemp_mask, cov_ca, fun=mean, na.rm=TRUE)
@@ -143,87 +139,87 @@ cov_data <- data %>%
 #March 4th 2020 CA declared emergency
 data_March042020 <- cov_data %>%
   filter(date=="3/4/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #March 13th 2020 School closure
 data_March132020 <- cov_data %>%
   filter(date=="3/13/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #March 29th 
 data_March292020 <- cov_data %>%
   filter(date=="3/29/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #May 25 slowly reopening
 data_May252020 <- cov_data %>%
   filter(date=="5/25/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #June 18 mask mandate
 data_June182020 <- cov_data %>%
   filter(date=="6/18/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #July 13 business closed again
 data_July132020 <- cov_data %>%
   filter(date=="7/13/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #August 28 new tier system
 data_August282020 <- cov_data %>%
   filter(date=="8/28/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #Octo 14 deaths plummet
 data_Octo142020 <- cov_data %>%
   filter(date=="10/14/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #Nov 19 curfew
 data_Nov192020 <- cov_data %>%
   filter(date=="11/19/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #Dec 3 lockdown
 data_Dec042020 <- cov_data %>%
   filter(date=="12/3/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #Dec 15 vaccination
 data_Dec152020 <- cov_data %>%
   filter(date=="12/15/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #Dec 29 stay at home order renewed
 data_Dec292020 <- cov_data %>%
   filter(date=="12/29/2020") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #Jan 25 2021 stay-at-home order lifted
 data_Jan252021 <- cov_data %>%
   filter(date=="1/25/2021") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #March 1 2021 school reopening compromise
 data_March012021 <- cov_data %>%
   filter(date=="3/1/2021") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #April 15 2021 Vaccination expanded to over 16
 data_April152021 <- cov_data %>%
   filter(date=="4/15/2021") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #June 15 2021 CA reopen
 data_June152021 <- cov_data %>%
   filter(date=="6/15/2021") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dpylr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 #August 5
 data_August052021 <- cov_data %>%
   filter(date=="8/5/2021") %>%
-  select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
+  dplyr::select(date,region, cases, cases_per_1000, fatality, mobility_trend, icu_occupancy, vax_ratio)
 
 ##Mapping function
 Choropleths <-function(data){
@@ -283,7 +279,7 @@ data_1 <- cov_data %>%
   group_by(region) %>%
   summarise(mobility_trend=mean(mobility_trend, na.rm = TRUE),icu_occupancy=mean(icu_occupancy, na.rm=TRUE))
 #August 10 data
-data_2 <-data_August092021 %>%
+data_2 <-data_August052021 %>%
   select(region, cases_per_1000, fatality, vax_ratio)
 #data from spatial polygon data frame
 data_3 <- cov_ca@data %>%
@@ -348,10 +344,12 @@ ca_nb <- poly2nb(CA_counties_boundary)
 
 ca_w<- nb2listw(ca_nb)
 
+#spatial autocorrelation in incidence rate
 moran.test(data_general$cases_per_1000, listw= ca_w)
-#spatial autocorrelation is rejected as p-value > 0.05
+
+
+#spatial autocorrelation in fatality
 moran.test(data_general$fatality, listw= ca_w)
-#spatial autocorrelation is rejected
 
 #visualization of model and actual case
 
